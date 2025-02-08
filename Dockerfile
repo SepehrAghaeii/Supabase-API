@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 3000
 
 # 6. فرمان اجرا هنگام شروع کانتینر
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]
