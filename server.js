@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
+const { registerUser, loginUser, getUserProfile } = require('./auth');
 
 const app = express();
 app.use(cors());
@@ -23,25 +24,25 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 
 // دریافت تمام کاربران
-app.get('/user', async (req, res) => {
-    const { data, error } = await supabase.from('users').select('*');
+app.get('/customers', async (req, res) => {
+    const { data, error } = await supabase.from('customers').select('*');
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
 
 // اضافه کردن کاربر جدید
-app.post('/users', async (req, res) => {
+app.post('/customers', async (req, res) => {
     try {
-        const { name, email } = req.body;
+        const { email } = req.body;
 
-        if (!name || !email) {
+        if (!email) {
             return res.status(400).json({ error: 'Name and email are required' });
         }
 
         // Insert data into Supabase
         const { data, error } = await supabase
-            .from('users')
-            .insert([{ name, email }])
+            .from('customers')
+            .insert([{ email }])
             .select('*');
 
         if (error) {
@@ -61,21 +62,26 @@ app.post('/users', async (req, res) => {
 
 
 // ویرایش اطلاعات کاربر
-app.put('/user/:id', async (req, res) => {
+app.put('/customers/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, email } = req.body;
-    const { data, error } = await supabase.from('users').update({ name, email }).eq('id', id);
+    const { email } = req.body;
+    const { data, error } = await supabase.from('customers').update({ email }).eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
 
 // حذف کاربر
-app.delete('/user/:id', async (req, res) => {
+app.delete('/customers/:id', async (req, res) => {
     const { id } = req.params;
-    const { error } = await supabase.from('users').delete().eq('id', id);
+    const { error } = await supabase.from('customers').delete().eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     res.send('✅ کاربر با موفقیت حذف شد');
 });
+
+
+app.post('/register', registerUser);
+app.post('/login', loginUser);
+app.get('/profile', getUserProfile);
 
 
 // تست اتصال
